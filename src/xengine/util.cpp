@@ -2,9 +2,9 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "util.h"
-
 #include <map>
+
+#include "util.h"
 #if defined(__linux__)
 #include <sys/prctl.h>
 #elif defined(__APPLE__)
@@ -148,7 +148,7 @@ public:
     void Init(const boost::filesystem::path& pathData, bool debug_, bool daemon)
     {
         sink = boost::shared_ptr<sink_t>(new sink_t(
-            keywords::file_name = "bigbang_%N.log",
+            keywords::file_name = "%Y-%m-%d_%N.log",
             keywords::rotation_size = 10 * 1024 * 1024,
             keywords::auto_flush = true));
 
