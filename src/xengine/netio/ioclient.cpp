@@ -2,11 +2,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "ioclient.h"
-
 #include <boost/asio/ssl/rfc2818_verification.hpp>
 #include <boost/bind.hpp>
 
+#include "ioclient.h"
 #include "iocontainer.h"
 #include "util.h"
 
@@ -123,6 +122,7 @@ void CIOClient::HandleCompleted(CallBackFunc fnCompleted,
 
 void CIOClient::HandleConnCompleted(CallBackConn fnCompleted, const boost::system::error_code& err)
 {
+    //sockClient.set_option(boost::asio::socket_base::keep_alive(true));
     fnCompleted(IsSocketOpen() ? err : boost::asio::error::operation_aborted);
 
     if (!IsSocketOpen() && nRefCount)
@@ -153,6 +153,14 @@ void CSocketClient::AsyncConnect(const tcp::endpoint& epRemote, CallBackConn fnC
 {
     sockClient.async_connect(epRemote, boost::bind(&CSocketClient::HandleConnCompleted, this,
                                                    fnConnected, boost::asio::placeholders::error));
+    int keepAlive = 1;
+    int keepIdle = 60 * 4;
+    int keepInterval = 5;
+    int keepCount = 2;
+    setsockopt(sockClient.native_handle(), SOL_SOCKET, SO_KEEPALIVE, (void*)&keepAlive, sizeof(keepAlive));
+    setsockopt(sockClient.native_handle(), SOL_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
+    setsockopt(sockClient.native_handle(), SOL_TCP, TCP_KEEPINTVL, (void*)&keepInterval, sizeof(keepInterval));
+    setsockopt(sockClient.native_handle(), SOL_TCP, TCP_KEEPCNT, (void*)&keepCount, sizeof(keepCount));
 }
 
 void CSocketClient::AsyncRead(CBufStream& ssRecv, size_t nLength, CallBackFunc fnCompleted)
