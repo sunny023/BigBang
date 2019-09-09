@@ -9,6 +9,7 @@
 #include "iocontainer.h"
 #include "util.h"
 
+#ifdef __CYGWIN__
 #ifndef TCP_KEEPIDLE
 #define TCP_KEEPIDLE 4     /* Start keeplives after this period */
 #endif
@@ -19,6 +20,7 @@
  
 #ifndef TCP_KEEPCNT
 #define TCP_KEEPCNT 6      /* Number of keepalives before death */
+#endif
 #endif
 
 using namespace std;
