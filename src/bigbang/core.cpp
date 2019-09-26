@@ -2,10 +2,9 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "core.h"
-
 #include "../common/template/exchange.h"
 #include "address.h"
+#include "core.h"
 #include "wallet.h"
 
 using namespace std;
@@ -783,7 +782,7 @@ void CTestNetCoreProtocol::GetGenesisBlock(CBlock& block)
 
     block.nVersion = 1;
     block.nType = CBlock::BLOCK_GENESIS;
-    block.nTimeStamp = (ptime(date(2019, 9, 23), time_duration(15 - 8, 0, 0)) - ptime(date(1970, 1, 1))).total_seconds();
+    block.nTimeStamp = (ptime(date(2019, 9, 25), time_duration(14 - 8, 0, 0)) - ptime(date(1970, 1, 1))).total_seconds();
     block.hashPrev = 0;
 
     CTransaction& tx = block.txMint;
