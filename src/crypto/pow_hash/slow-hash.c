@@ -44,7 +44,7 @@
 #include "variant4_random_math.h"
 
 #define MEMORY         (1 << 21) // 2MB scratchpad
-#define ITER           (1 << 16)
+#define ITER           (1 << 15)
 #define AES_BLOCK_SIZE  16
 #define AES_KEY_SIZE    32
 #define INIT_SIZE_BLK   8
@@ -761,10 +761,6 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
     }
     memcpy(text, state.init, INIT_SIZE_BYTE);
 
-    VARIANT1_INIT64();
-    VARIANT2_INIT64();
-    VARIANT4_RANDOM_MATH_INIT();
-
     /* CryptoNight Step 2:  Iteratively encrypt the results from Keccak to fill
      * the 2MB large random access buffer.
      */
@@ -790,6 +786,15 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
             memcpy(&hp_state[i * INIT_SIZE_BYTE], text, INIT_SIZE_BYTE);
         }
     }
+
+#define SHA3_COUNT 100
+	for (int ii = 0; ii < SHA3_COUNT; ii++) {
+		hash_process(&state.hs, (uint8_t*)& state.hs, 128);
+	}
+
+	VARIANT1_INIT64();
+	VARIANT2_INIT64();
+	VARIANT4_RANDOM_MATH_INIT();
 
     U64(a)[0] = U64(&state.k[0])[0] ^ U64(&state.k[32])[0];
     U64(a)[1] = U64(&state.k[0])[1] ^ U64(&state.k[32])[1];
