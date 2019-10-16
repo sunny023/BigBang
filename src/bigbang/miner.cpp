@@ -417,7 +417,7 @@ void CMiner::LaunchMiner()
                     nTime = t;
                     hashTarget = GetHashTarget(work, t);
                 }
-                for (int i = 0; i < 100 * 1024; i++, nNonce += 256)
+                for (int i = 0; i < 100 * 1024; i++, nNonce++)
                 {
                     uint256 hash = crypto::CryptoPowHash(&work.vchWorkData[0], work.vchWorkData.size());
                     if (hash <= hashTarget)

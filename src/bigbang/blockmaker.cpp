@@ -562,7 +562,7 @@ bool CBlockMaker::CreateProofOfWork(CBlock& block, CBlockMakerHashAlgo* pHashAlg
                     pHashAlgo->strAlgo.c_str(), nHashRate, hash.GetHex().c_str(), hashTarget.GetHex().c_str());
                 return true;
             }
-            nNonce += 256;
+            nNonce++;
         }
 
         int64 nNetTime = GetNetTime();
