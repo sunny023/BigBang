@@ -77,6 +77,15 @@ set(sources
     ${mode_src}
 )
 
+execute_process(
+        COMMAND git rev-parse HEAD 
+        COMMAND cut -c 1-8
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE vGitCommitID
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+add_definitions(-D GIT_VERSION=0x${vGitCommitID})
+
 add_executable(bigbang ${sources})
 
 include_directories(../xengine ../crypto ../common ../storage ../network ../delegate ../mpvss ../jsonrpc ./)
