@@ -735,8 +735,13 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
     RDATA_ALIGN16 uint64_t a[2];
     RDATA_ALIGN16 uint64_t b[4];
     RDATA_ALIGN16 uint64_t c[2];
+
+	  RDATA_ALIGN16 uint8_t sha_data[32] = { 0 };
+	  RDATA_ALIGN16 uint8_t sha_out[200] = { 0 };
+
+
     union cn_slow_hash_state state;
-    __m128i _a, _b, _b1, _c;
+    __m128i _a, _b, _b1, _c, _c_aes;
     uint64_t hi, lo;
 
     size_t i, j;
@@ -760,6 +765,10 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
         hash_process(&state.hs, data, length);
     }
     memcpy(text, state.init, INIT_SIZE_BYTE);
+
+    VARIANT1_INIT64();
+    VARIANT2_INIT64();
+    VARIANT4_RANDOM_MATH_INIT();
 
     /* CryptoNight Step 2:  Iteratively encrypt the results from Keccak to fill
      * the 2MB large random access buffer.
@@ -787,15 +796,6 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
         }
     }
 
-#define SHA3_COUNT 100
-	for (int ii = 0; ii < SHA3_COUNT; ii++) {
-		hash_process(&state.hs, (uint8_t*)& state.hs, 128);
-	}
-
-	VARIANT1_INIT64();
-	VARIANT2_INIT64();
-	VARIANT4_RANDOM_MATH_INIT();
-
     U64(a)[0] = U64(&state.k[0])[0] ^ U64(&state.k[32])[0];
     U64(a)[1] = U64(&state.k[0])[1] ^ U64(&state.k[32])[1];
     U64(b)[0] = U64(&state.k[16])[0] ^ U64(&state.k[48])[0];
@@ -814,9 +814,22 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
     {
         for(i = 0; i < ITER / 2; i++)
         {
-            pre_aes();
-            _c = _mm_aesenc_si128(_c, _a);
-            post_aes();
+          pre_aes();
+			    _mm_store_si128(R128(sha_data), _c);
+			    _mm_store_si128(R128(sha_data+16), _a);
+			    hash_process((union hash_state*)sha_out, sha_data, 32);
+
+          _c = _mm_aesenc_si128(_c, _a);
+			    _c_aes = _c;
+			    for (int j = 0; j < 27; j++) {
+				    _c_aes = _mm_aesenc_si128(_c_aes, _c_aes);
+			    }
+			    post_aes();
+			    a[0] ^= U64(&_c_aes)[0];
+			    a[1] ^= U64(&_c_aes)[1];
+
+			    a[0] ^= U64(sha_out)[0];
+			    a[1] ^= U64(sha_out)[1];
         }
     }
     else
