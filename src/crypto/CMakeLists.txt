@@ -6,6 +6,10 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #------------------------------------------------------------------------------
 
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes")
+
 set(pow_hash
     pow_hash/common/int-util.h
     pow_hash/aesb.c          
@@ -35,6 +39,15 @@ set(pow_hash
     pow_hash/oaes_lib.h
     pow_hash/skein_port.h
     pow_hash/variant2_int_sqrt.h
+    cnbbc/cnbbc.cpp
+    cnbbc/cn/VirtualMemory_unix.cpp
+    cnbbc/cn/VirtualMemory.cpp
+    cnbbc/cn/keccak.cpp
+    cnbbc/cn/CnCtx.cpp
+    cnbbc/cn/c_jh.c
+    cnbbc/cn/c_groestl.c
+    cnbbc/cn/c_blake256.c
+    cnbbc/cn/c_skein.c
 )
 
 set(curve25519
