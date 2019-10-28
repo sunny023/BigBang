@@ -33,7 +33,7 @@ instance=$(ps aux | grep "$app" | grep -v "console" | grep -v "grep" | grep -v "
 if [ "$instance" -le 1 ]; then
     $app -daemon -debug
 	echo $(date -Iseconds)     bigbang has started. | tee -a $logfile
-    echo 'Waiting for bigbang daemon running up...' | tee -a $logfile
+    echo 'Waiting for bigbang daemon running up(10s)...' | tee -a $logfile
     sleep 10
 fi
 
@@ -69,14 +69,33 @@ fi
 #"address" : "1hn4p3kycpejvv4nydpzzatjc5dmwt8rvs9xgzdscvzpj9fff2eaw8y6j",
 # mint template address
 # 20g0bdg20sx9ajssd39ghzbrjtphqcb0q1ng40skeahh2pa6xghbnxgw1
-function charge
+function charge2A
 {
-
     # unlock spend key
     ret=`bigbang unlockkey bcd98f67dbeefdeea004805aece66885eb0a25cd1e35842e6355259c8ff91576 123`
 	echo $(date -Iseconds)     $ret | tee -a $logfile
 	# charge A from mint
-    ret=`bigbang sendfrom 20g0bdg20sx9ajssd39ghzbrjtphqcb0q1ng40skeahh2pa6xghbnxgw1 123bd9kvh4gze86yr8d1gqscebx0zs4z8wc270py227h8cres28qf4xeg 1100.00 3.0`
+    ret=`bigbang sendfrom 20g0bdg20sx9ajssd39ghzbrjtphqcb0q1ng40skeahh2pa6xghbnxgw1 123bd9kvh4gze86yr8d1gqscebx0zs4z8wc270py227h8cres28qf4xeg 300.00 1.0`
+	echo $(date -Iseconds)     $ret | tee -a $logfile
+}
+
+function charge2B
+{
+    # unlock spend key
+    ret=`bigbang unlockkey bcd98f67dbeefdeea004805aece66885eb0a25cd1e35842e6355259c8ff91576 123`
+	echo $(date -Iseconds)     $ret | tee -a $logfile
+	# charge A from mint
+    ret=`bigbang sendfrom 20g0bdg20sx9ajssd39ghzbrjtphqcb0q1ng40skeahh2pa6xghbnxgw1 11bnz37gkgf7hm09wcs7emjf1hq1hfyc5nj64tzzmnpe5xf56td1chy5q 300.00 1.0`
+	echo $(date -Iseconds)     $ret | tee -a $logfile
+}
+
+function charge2C
+{
+    # unlock spend key
+    ret=`bigbang unlockkey bcd98f67dbeefdeea004805aece66885eb0a25cd1e35842e6355259c8ff91576 123`
+	echo $(date -Iseconds)     $ret | tee -a $logfile
+	# charge A from mint
+    ret=`bigbang sendfrom 20g0bdg20sx9ajssd39ghzbrjtphqcb0q1ng40skeahh2pa6xghbnxgw1 1hxxcgrjqdn3czykqb5gx2g2sjw0bt5ng42y0pgrmhg1z8pf8g6pfmzz5 300.00 1.0`
 	echo $(date -Iseconds)     $ret | tee -a $logfile
 }
 
@@ -133,21 +152,27 @@ sendfrom()
       local pwd=123
       local payer="123bd9kvh4gze86yr8d1gqscebx0zs4z8wc270py227h8cres28qf4xeg"
       local payee="11bnz37gkgf7hm09wcs7emjf1hq1hfyc5nj64tzzmnpe5xf56td1chy5q"
-      echo "wait for around 60s to receive charge..."
-      sleep 67
-      charge
+      echo "wait for around 60s to receive charging from mint..."
+      sleep 61
+      charge2A
       ;;
   b)
       local paykey="42d3a6bc5e9cadf47f4d8cac85f917c38de149ea4e663c011acf83139ef1eb0a"
       local pwd=123
       local payer="11bnz37gkgf7hm09wcs7emjf1hq1hfyc5nj64tzzmnpe5xf56td1chy5q"
       local payee="1hxxcgrjqdn3czykqb5gx2g2sjw0bt5ng42y0pgrmhg1z8pf8g6pfmzz5"
+      echo "wait for around 60s to receive charging from mint..."
+      sleep 65
+      charge2B
       ;;
   c)
       local paykey="ac81e859f4038c14430bbc20b016bd00975940d1615977facf466d5762c87a8f"
       local pwd=123
       local payer="1hxxcgrjqdn3czykqb5gx2g2sjw0bt5ng42y0pgrmhg1z8pf8g6pfmzz5"
       local payee="123bd9kvh4gze86yr8d1gqscebx0zs4z8wc270py227h8cres28qf4xeg"
+      echo "wait for around 60s to receive charging from mint..."
+      sleep 67
+      charge2C
       ;;
   *)
       echo 'should not be here!'
@@ -184,7 +209,7 @@ sendfrom()
 	sleep $gap
 	acc=$[$acc+$gap]
 	if [ $acc -ge 60 ]; then
-	  charge
+	  charge2A
 	  acc=$[$acc-60]
 	fi
   done
