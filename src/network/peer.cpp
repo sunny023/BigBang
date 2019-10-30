@@ -50,6 +50,27 @@ void CBbPeer::Activate()
     }
 }
 
+void CBbPeer::UnActivate()
+{
+    StdLog("queAskFor", "UnActivate: queAskFor size: %ld, peer: %s:%d", queAskFor.size(), GetRemote().address().to_string().c_str(), GetRemote().port());
+
+    int64 nSetTime;
+    int64 nCurTime;
+    uint256 hashFork;
+    CInv inv;
+
+    nCurTime = GetTime();
+    while (!queAskFor.empty())
+    {
+        nSetTime = queAskFor.front().first;
+        hashFork = queAskFor.front().second.first;
+        inv = queAskFor.front().second.second;
+        queAskFor.pop();
+
+        StdLog("queAskFor", "UnActivate: WaitTimeLen: %ld s, INV: [%d] %s", nCurTime - nSetTime, inv.nType, inv.nHash.GetHex().c_str());
+    }
+}
+
 bool CBbPeer::IsHandshaked()
 {
     return (nHsTimerId == 0);
@@ -106,17 +127,27 @@ void CBbPeer::AskFor(const uint256& hashFork, const vector<CInv>& vInv)
 {
     for (const CInv& inv : vInv)
     {
-        queAskFor.push(make_pair(hashFork, inv));
+        queAskFor.push(make_pair(GetTime(), make_pair(hashFork, inv)));
+        StdLog("TestPeer3", "CBbPeer AskFor: recv getdata request: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
     }
 }
 
 bool CBbPeer::FetchAskFor(uint256& hashFork, CInv& inv)
 {
+    int64 nSetTime;
+    int64 nCurTime;
+    nCurTime = GetTime();
     if (!queAskFor.empty())
     {
-        hashFork = queAskFor.front().first;
-        inv = queAskFor.front().second;
+        nSetTime = queAskFor.front().first;
+        hashFork = queAskFor.front().second.first;
+        inv = queAskFor.front().second.second;
         queAskFor.pop();
+
+        if (nCurTime - nSetTime > 4)
+        {
+            StdLog("queAskFor", "FetchAskFor: WaitTimeLen: %ld s, size: %ld, INV: [%d] %s", nCurTime - nSetTime, queAskFor.size(), inv.nType, inv.nHash.GetHex().c_str());
+        }
         return true;
     }
     return false;
@@ -150,8 +181,13 @@ void CBbPeer::SendPing()
 {
     CBufStream ssPayload;
     nPingSeq = (static_cast<CBbPeerNet*>(pPeerNet))->BuildPing(this, ssPayload);
-    SendMessage(PROTO_CHN_NETWORK, PROTO_CMD_PING, ssPayload);
+    if (!SendMessage(PROTO_CHN_NETWORK, PROTO_CMD_PING, ssPayload))
+    {
+        StdLog("TestPeerError", "CBbPeer::SendPing: SendMessage fail");
+        return;
+    }
     nPingMillisTime = GetTimeMillis();
+    StdLog("TestPeer3", "CBbPeer::SendPing: send PROTO_CMD_PING");
 }
 
 bool CBbPeer::ParseMessageHeader()

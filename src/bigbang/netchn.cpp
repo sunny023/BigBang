@@ -450,6 +450,7 @@ bool CNetChannel::HandleEvent(network::CEventPeerInv& eventInv)
             vector<uint256> vTxHash;
             for (const network::CInv& inv : eventInv.data)
             {
+                StdLog("TestPeer3", "CEventPeerInv: Recv INV: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
                 if (inv.nType == network::CInv::MSG_TX)
                 {
                     if (!pTxPool->Exists(inv.nHash) && !pBlockChain->ExistsTx(inv.nHash))
@@ -494,16 +495,21 @@ bool CNetChannel::HandleEvent(network::CEventPeerGetData& eventGetData)
     network::CEventPeerGetFail eventGetFail(nNonce, hashFork);
     for (const network::CInv& inv : eventGetData.data)
     {
+        StdLog("TestPeer3", "CNetChannel CEventPeerGetData: recv getdata req, inv: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
         if (inv.nType == network::CInv::MSG_TX)
         {
             network::CEventPeerTx eventTx(nNonce, hashFork);
             if (pTxPool->Get(inv.nHash, eventTx.data))
             {
+                StdLog("TestPeer3", "CNetChannel CEventPeerGetData(TX): TxPool Get success, inv: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
                 pPeerNet->DispatchEvent(&eventTx);
+                StdLog("TestPeer3", "CNetChannel CEventPeerGetData(TX): DispatchEvent over, inv: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
             }
             else if (pBlockChain->GetTransaction(inv.nHash, eventTx.data))
             {
+                StdLog("TestPeer3", "CNetChannel CEventPeerGetData(TX): BlockChain GetTransaction success, inv: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
                 pPeerNet->DispatchEvent(&eventTx);
+                StdLog("TestPeer3", "CNetChannel CEventPeerGetData(TX): DispatchEvent over, inv: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
             }
             else
             {
@@ -516,7 +522,9 @@ bool CNetChannel::HandleEvent(network::CEventPeerGetData& eventGetData)
             network::CEventPeerBlock eventBlock(nNonce, hashFork);
             if (pBlockChain->GetBlock(inv.nHash, eventBlock.data))
             {
+                StdLog("TestPeer3", "CNetChannel CEventPeerGetData(BLOCK): BlockChain GetBlock success, inv: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
                 pPeerNet->DispatchEvent(&eventBlock);
+                StdLog("TestPeer3", "CNetChannel CEventPeerGetData(BLOCK): DispatchEvent over, inv: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
             }
             else
             {
@@ -591,6 +599,8 @@ bool CNetChannel::HandleEvent(network::CEventPeerTx& eventTx)
 
     try
     {
+        StdLog("TestPeer3", "CNetChannel CEventPeerTx: recv tx: %s", txid.GetHex().c_str());
+
         boost::recursive_mutex::scoped_lock scoped_lock(mtxSched);
 
         set<uint64> setSchedPeer, setMisbehavePeer;
@@ -652,6 +662,8 @@ bool CNetChannel::HandleEvent(network::CEventPeerBlock& eventBlock)
 
     try
     {
+        StdLog("TestPeer3", "CNetChannel CEventPeerBlock: recv block: %s", hash.GetHex().c_str());
+
         boost::recursive_mutex::scoped_lock scoped_lock(mtxSched);
 
         set<uint64> setSchedPeer, setMisbehavePeer;

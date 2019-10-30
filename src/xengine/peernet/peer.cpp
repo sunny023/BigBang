@@ -67,6 +67,10 @@ void CPeer::Activate()
     nTimeSend = 0;
 }
 
+void CPeer::UnActivate()
+{
+}
+
 bool CPeer::PingTimer(uint32 nTimerId)
 {
     return false;

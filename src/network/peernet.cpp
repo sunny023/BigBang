@@ -99,6 +99,10 @@ bool CBbPeerNet::HandleEvent(CEventPeerGetData& eventGetData)
     {
         if (SetInvTimer(eventGetData.nNonce, eventGetData.data))
         {
+            for (const network::CInv& inv : eventGetData.data)
+            {
+                StdLog("TestPeer3", "CBbPeerNet CEventPeerGetData: send getdata request success: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
+            }
             return true;
         }
     }
@@ -117,16 +121,30 @@ bool CBbPeerNet::HandleEvent(CEventPeerGetBlocks& eventGetBlocks)
 
 bool CBbPeerNet::HandleEvent(CEventPeerTx& eventTx)
 {
+    StdLog("TestPeer3", "CBbPeerNet CEventPeerTx: send PROTO_CMD_TX: txid: %s", eventTx.data.GetHash().GetHex().c_str());
+
     CBufStream ssPayload;
     ssPayload << eventTx;
-    return SendDataMessage(eventTx.nNonce, PROTO_CMD_TX, ssPayload);
+    if (!SendDataMessage(eventTx.nNonce, PROTO_CMD_TX, ssPayload))
+    {
+        StdLog("TestPeerError", "CBbPeerNet CEventPeerTx: send PROTO_CMD_TX: SendDataMessage fail, txid: %s", eventTx.data.GetHash().GetHex().c_str());
+        return false;
+    }
+    return true;
 }
 
 bool CBbPeerNet::HandleEvent(CEventPeerBlock& eventBlock)
 {
+    StdLog("TestPeer3", "CBbPeerNet CEventPeerBlock: send PROTO_CMD_BLOCK: block hash: %s", eventBlock.data.GetHash().GetHex().c_str());
+
     CBufStream ssPayload;
     ssPayload << eventBlock;
-    return SendDataMessage(eventBlock.nNonce, PROTO_CMD_BLOCK, ssPayload);
+    if (!SendDataMessage(eventBlock.nNonce, PROTO_CMD_BLOCK, ssPayload))
+    {
+        StdLog("TestPeerError", "CBbPeerNet CEventPeerBlock: send PROTO_CMD_BLOCK: SendDataMessage fail, block hash: %s", eventBlock.data.GetHash().GetHex().c_str());
+        return false;
+    }
+    return true;
 }
 
 bool CBbPeerNet::HandleEvent(CEventPeerGetFail& eventGetFail)
@@ -279,6 +297,7 @@ bool CBbPeerNet::SetInvTimer(uint64 nNonce, vector<CInv>& vInv)
             {
                 nElapse += nTimeout[inv.nType];
                 string strFunc = string("InvTimer: nNonce: ") + to_string(nNonce) + ", Inv: [" + to_string(inv.nType) + "] " + inv.nHash.GetHex();
+                StdLog("TestPeer3", "SetInvTimer: %s", strFunc.c_str());
                 uint32 nTimerId = SetTimer(nNonce, nElapse, strFunc);
                 CancelTimer(pBbPeer->Request(inv, nTimerId));
             }
@@ -301,8 +320,13 @@ void CBbPeerNet::ProcessAskFor(CPeer* pPeer)
         CEventPeerGetData* pEventGetData = new CEventPeerGetData(pBbPeer->GetNonce(), hashFork);
         if (pEventGetData != nullptr)
         {
+            StdLog("TestPeer3", "CBbPeerNet ProcessAskFor: send getdata to NetChannel: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
             pEventGetData->data.push_back(inv);
             pNetChannel->PostEvent(pEventGetData);
+        }
+        else
+        {
+            StdLog("TestPeer3", "CBbPeerNet ProcessAskFor: new CEventPeerGetData fail: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
         }
     }
 }
@@ -326,6 +350,7 @@ uint32 CBbPeerNet::BuildPing(xengine::CPeer* pPeer, xengine::CBufStream& ssPaylo
 
 void CBbPeerNet::HandlePeerWriten(CPeer* pPeer)
 {
+    StdLog("TestPeer3", "CBbPeerNet HandlePeerWriten: ProcessAskFor...");
     ProcessAskFor(pPeer);
 }
 
@@ -455,6 +480,7 @@ bool CBbPeerNet::HandlePeerRecvMessage(CPeer* pPeer, int nChannel, int nCommand,
             break;
         case PROTO_CMD_PING:
         {
+            StdLog("TestPeer3", "CBbPeerNet::HandlePeerRecvMessage: recv PROTO_CMD_PING");
             uint32 nSeq;
             int64 nTime;
             int nHeight;
@@ -463,10 +489,12 @@ bool CBbPeerNet::HandlePeerRecvMessage(CPeer* pPeer, int nChannel, int nCommand,
             nTime = GetNetTime();
             nHeight = pNetChannel->GetPrimaryChainHeight();
             ssRespPayload << nSeq << nTime << nHeight;
+            StdLog("TestPeer3", "CBbPeerNet::HandlePeerRecvMessage: send PROTO_CMD_PONG");
             return pBbPeer->SendMessage(PROTO_CHN_NETWORK, PROTO_CMD_PONG, ssRespPayload);
         }
         case PROTO_CMD_PONG:
         {
+            StdLog("TestPeer3", "CBbPeerNet::HandlePeerRecvMessage: recv PROTO_CMD_PONG");
             uint32 nSeq;
             int64 nTime;
             ssPayload >> nSeq >> nTime >> pBbPeer->nStartingHeight;
@@ -528,6 +556,7 @@ bool CBbPeerNet::HandlePeerRecvMessage(CPeer* pPeer, int nChannel, int nCommand,
         {
             vector<CInv> vInv;
             ssPayload >> vInv;
+            StdLog("TestPeer3", "CBbPeerNet PROTO_CMD_GETDATA: ProcessAskFor...");
             pBbPeer->AskFor(hashFork, vInv);
             ProcessAskFor(pPeer);
             return true;
@@ -550,10 +579,15 @@ bool CBbPeerNet::HandlePeerRecvMessage(CPeer* pPeer, int nChannel, int nCommand,
             if (pEvent != nullptr)
             {
                 ssPayload >> pEvent->data;
+                StdLog("TestPeer3", "recv PROTO_CMD_TX: txid: %s", pEvent->data.GetHash().GetHex().c_str());
                 CInv inv(CInv::MSG_TX, pEvent->data.GetHash());
                 CancelTimer(pBbPeer->Responded(inv));
                 pNetChannel->PostEvent(pEvent);
                 return true;
+            }
+            else
+            {
+                StdLog("TestPeerError", "recv PROTO_CMD_TX: new CEventPeerTx fai.");
             }
         }
         break;
@@ -563,10 +597,15 @@ bool CBbPeerNet::HandlePeerRecvMessage(CPeer* pPeer, int nChannel, int nCommand,
             if (pEvent != nullptr)
             {
                 ssPayload >> pEvent->data;
+                StdLog("TestPeer3", "recv PROTO_CMD_BLOCK: block: %s", pEvent->data.GetHash().GetHex().c_str());
                 CInv inv(CInv::MSG_BLOCK, pEvent->data.GetHash());
                 CancelTimer(pBbPeer->Responded(inv));
                 pNetChannel->PostEvent(pEvent);
                 return true;
+            }
+            else
+            {
+                StdLog("TestPeerError", "recv PROTO_CMD_BLOCK: new CEventPeerBlock fai.");
             }
         }
         break;

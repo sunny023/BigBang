@@ -244,6 +244,8 @@ void CPeerNet::RemovePeer(CPeer* pPeer, const CEndpointManager::CloseReason& rea
     }
     StdWarn("CPeerNet", "Remove Peer (%d : %s) : %s", reason, strReason.c_str(), GetEpString(pPeer->GetRemote()).c_str());
 
+    pPeer->UnActivate();
+
     epMngr.CloseEndpoint(pPeer->GetRemote(), reason);
 
     CancelClientTimers(pPeer->GetNonce());

@@ -134,6 +134,7 @@ void CSchedule::AddNewInv(const network::CInv& inv, uint64 nPeerNonce)
     {
         mapState[inv].setKnownPeer.insert(nPeerNonce);
         peer.AddNewInv(inv);
+        StdLog("TestPeer3", "CSchedule AddNewInv success: [%d] %s", inv.nType, inv.nHash.GetHex().c_str());
     }
 }
 

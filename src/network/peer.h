@@ -23,6 +23,7 @@ public:
             bool fInBoundIn, uint32 nMsgMagicIn, uint32 nHsTimerIdIn);
     ~CBbPeer();
     void Activate() override;
+    void UnActivate() override;
     bool IsHandshaked();
     bool SendMessage(int nChannel, int nCommand, xengine::CBufStream& ssPayload);
     bool SendMessage(int nChannel, int nCommand)
@@ -67,7 +68,7 @@ protected:
     CPeerMessageHeader hdrRecv;
 
     std::map<CInv, uint32> mapRequest;
-    std::queue<std::pair<uint256, CInv>> queAskFor;
+    std::queue<std::pair<int64, std::pair<uint256, CInv>>> queAskFor;
 };
 
 class CBbPeerInfo : public xengine::CPeerInfo
