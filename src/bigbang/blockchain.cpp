@@ -464,9 +464,16 @@ Errno CBlockChain::AddNewBlock(const CBlock& block, CBlockChainUpdate& update)
     Log("AddNew Block : %s\n", pIndexNew->ToString().c_str());
     if (Config()->fDebug)
     {
+        StdLog("Peer3Test", "AddNewBlock: 11111111111111111111111111111111");
         std::set<uint256> txUpdate;
         view.GetTxUpdated(txUpdate);
-        Debug("New Block %s tx : %s\n", hash.ToString().c_str(), view.ToString().c_str());
+        StdLog("Peer3Test", "AddNewBlock: 22222222222222222222222222222222");
+        std::string strView = view.ToString().c_str();
+        StdLog("Peer3Test", "AddNewBlock: 33333333333333333333333333333333");
+        Debug("New Block %s tx : %s\n", hash.ToString().c_str(), strView.c_str());
+        //Debug("New Block %s tx : %s\n", hash.ToString().c_str(), view.ToString().c_str());
+        //Debug("New Block %s txUpdate size : %ld\n", hash.ToString().c_str(), txUpdate.size());
+        StdLog("Peer3Test", "AddNewBlock: 44444444444444444444444444444444");
     }
 
     CBlockIndex* pIndexFork = nullptr;
