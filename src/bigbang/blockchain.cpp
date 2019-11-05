@@ -435,7 +435,13 @@ Errno CBlockChain::AddNewBlock(const CBlock& block, CBlockChainUpdate& update)
             err = pCoreProtocol->VerifyBlockTx(tx, txContxt, pIndexPrev, nForkHeight, pIndexPrev->GetOriginHash());
             if (err != OK)
             {
-                Log("AddNewBlock Verify BlockTx Error(%s) : %s \n", ErrorString(err), txid.ToString().c_str());
+#ifdef NDEBUG
+                Log("AddNewBlock Get txContxt Error([%d] %s) : %s \n", err, ErrorString(err), txid.ToString().c_str());
+#else
+                Log("AddNewBlock Get txContxt Error([%d] %s) : %s,prev: %s,blockhash:%s ", err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
+                pTxPool->Halt();
+                assert(1 == 2);
+#endif
                 return err;
             }
         }
