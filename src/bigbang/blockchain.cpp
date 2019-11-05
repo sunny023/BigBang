@@ -427,7 +427,13 @@ Errno CBlockChain::AddNewBlock(const CBlock& block, CBlockChainUpdate& update)
         err = GetTxContxt(view, tx, txContxt);
         if (err != OK)
         {
+#ifdef NDEBUG
             Log("AddNewBlock Get txContxt Error([%d] %s) : %s \n", err, ErrorString(err), txid.ToString().c_str());
+#else
+            Log("AddNewBlock Get txContxt Error([%d] %s) : %s,prev: %s,blockhash:%s ", err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
+            pTxPool->Halt();
+            assert(1 == 2);
+#endif
             return err;
         }
         if (!pTxPool->Exists(txid))
@@ -436,9 +442,9 @@ Errno CBlockChain::AddNewBlock(const CBlock& block, CBlockChainUpdate& update)
             if (err != OK)
             {
 #ifdef NDEBUG
-                Log("AddNewBlock Get txContxt Error([%d] %s) : %s \n", err, ErrorString(err), txid.ToString().c_str());
+                Log("AddNewBlock Get txContxt Error 2([%d] %s) : %s \n", err, ErrorString(err), txid.ToString().c_str());
 #else
-                Log("AddNewBlock Get txContxt Error([%d] %s) : %s,prev: %s,blockhash:%s ", err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
+                Log("AddNewBlock Get txContxt Error 2([%d] %s) : %s,prev: %s,blockhash:%s ", err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
                 pTxPool->Halt();
                 assert(1 == 2);
 #endif
