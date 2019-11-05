@@ -232,6 +232,8 @@ CRPCMod::CRPCMod()
         ("importwallet", &CRPCMod::RPCImportWallet)
         //
         ("makeorigin", &CRPCMod::RPCMakeOrigin)
+        //
+        ("importaddress", &CRPCMod::RPCImportAddress)
         /* Util */
         ("verifymessage", &CRPCMod::RPCVerifyMessage)
         //
@@ -1995,6 +1997,40 @@ CRPCResultPtr CRPCMod::RPCMakeOrigin(CRPCParamPtr param)
     auto spResult = MakeCMakeOriginResultPtr();
     spResult->strHash = hashBlock.GetHex();
     spResult->strHex = ToHexString((const unsigned char*)ss.GetData(), ss.GetSize());
+
+    return spResult;
+}
+
+CRPCResultPtr CRPCMod::RPCImportAddress(CRPCParamPtr param)
+{
+    auto spParam = CastParamPtr<CImportAddressParam>(param);
+
+    //check if the input address is validated
+    CAddress address(spParam->strAddr);
+    bool isValid = !address.IsNull();
+    if (!isValid)
+    {
+        throw CRPCException(RPC_WALLET_ERROR, "The address you provide is invalided.");
+    }
+
+    if (address.IsTemplate())
+    {
+        throw CRPCException(RPC_WALLET_ERROR, "Should provide a pubkey address rather than a template address.");
+    }
+
+    //check if the input address has already been in the current wallet
+    crypto::CPubKey pubkey;
+    address.GetPubKey(pubkey);
+    bool isMine = pService->HaveKey(pubkey);
+    if (isMine)
+    {
+        throw CRPCException(RPC_WALLET_ERROR, "The address you give has already been in the wallet with payable role.");
+    }
+
+    string strPubkey = pubkey.GetHex();
+
+    auto spResult = MakeCImportAddressResultPtr();
+    spResult->strResult = "Importing pubkey address is successful:\n" + strPubkey;
 
     return spResult;
 }

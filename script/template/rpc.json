@@ -2522,6 +2522,40 @@
             "{\"code\":-401,\"message\":\"Failed to sign message\"}"
         ]
     },
+    "importaddress": {
+        "type": "command",
+        "name": "ImportAddress",
+        "desc": "Import pubkey address to current wallet.",
+        "request": {
+            "type": "object",
+            "content": {
+                "addr": {
+                    "type": "string",
+                    "desc": "pubkey address"
+                }
+            }
+        },
+        "response": {
+            "type": "string",
+            "name": "result",
+            "desc": "the public key to the imported pubkey address"
+        },
+        "example": [
+            {
+                "request": "bigbang-cli importaddress 1965p604xzdrffvg90ax9bk0q3xyqn5zz2vc9zpbe3wdswzazj7d144mm",
+                "response": "Importing pubkey address is successful:\nda915f7d9e1b1f6ed99fd816ff977a7d1f17cc95ba0209eef770fb9d00638b49"
+            },
+            {
+                "request": "{\"id\":7,\"method\":\"importaddress\",\"jsonrpc\":\"2.0\",\"params\":{\"addr\":\"1965p604xzdrffvg90ax9bk0q3xyqn5zz2vc9zpbe3wdswzazj7d144mm\"}}",
+                "response": "{\"id\":7,\"jsonrpc\":\"2.0\",\"result\":\"Importing pubkey address is successful:\nda915f7d9e1b1f6ed99fd816ff977a7d1f17cc95ba0209eef770fb9d00638b49\"}"
+            }
+        ],
+        "error": [
+            "{\"code\":-401,\"message\":\"The address you provide is invalided.\"}",
+            "{\"code\":-401,\"message\":\"Should provide a pubkey address.\"}",
+            "{\"code\":-401,\"message\":\"The address you give has already been in the wallet with payable role.\"}"
+        ]
+    },
     "verifymessage": {
         "type": "command",
         "name": "VerifyMessage",
