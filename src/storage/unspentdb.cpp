@@ -396,8 +396,14 @@ bool CUnspentDB::Retrieve(const uint256& hashFork, const CTxOutPoint& txout, CTx
     map<uint256, std::shared_ptr<CForkUnspentDB>>::iterator it = mapUnspentDB.find(hashFork);
     if (it != mapUnspentDB.end())
     {
-        return (*it).second->ReadUnspent(txout, output);
+        if (!(*it).second->ReadUnspent(txout, output))
+        {
+            StdTrace("CUnspentDB", "Retrieve: ReadUnspent fail: txout: %s [%d]", txout.hash.GetHex().c_str(), txout.n);
+            return false;
+        }
+        return true;
     }
+    StdTrace("CUnspentDB", "Retrieve: fork find fail: forkid: %s", hashFork.GetHex().c_str());
     return false;
 }
 

@@ -126,7 +126,12 @@ bool CBlockView::RetrieveUnspent(const CTxOutPoint& out, CTxOut& unspent)
     if (it != mapUnspent.end())
     {
         unspent = (*it).second;
-        return (!unspent.IsNull());
+        if (unspent.IsNull())
+        {
+            StdTrace("CBlockView", "RetrieveUnspent: spented: txid: %s, n: %d", out.hash.GetHex().c_str(), out.n);
+            return false;
+        }
+        return true;
     }
 
     return pBlockBase->GetTxUnspent(hashFork, out, unspent);

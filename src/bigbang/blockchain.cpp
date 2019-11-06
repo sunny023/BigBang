@@ -430,9 +430,10 @@ Errno CBlockChain::AddNewBlock(const CBlock& block, CBlockChainUpdate& update)
 #ifdef NDEBUG
             Log("AddNewBlock Get txContxt Error([%d] %s) : %s \n", err, ErrorString(err), txid.ToString().c_str());
 #else
-            Log("AddNewBlock Get txContxt Error([%d] %s) : %s,prev: %s,blockhash:%s ", err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
-            pTxPool->Halt();
-            assert(1 == 2);
+            Log("AddNewBlock Get txContxt Error([%d] %s) : txid: %s, prevblock: %s, blockhash: %s",
+                err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
+            //pTxPool->Halt();
+            //assert(1 == 2);
 #endif
             return err;
         }
@@ -444,9 +445,10 @@ Errno CBlockChain::AddNewBlock(const CBlock& block, CBlockChainUpdate& update)
 #ifdef NDEBUG
                 Log("AddNewBlock Get txContxt Error 2([%d] %s) : %s \n", err, ErrorString(err), txid.ToString().c_str());
 #else
-                Log("AddNewBlock Get txContxt Error 2([%d] %s) : %s,prev: %s,blockhash:%s ", err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
-                pTxPool->Halt();
-                assert(1 == 2);
+                Log("AddNewBlock Get txContxt Error([%d] %s) : txid: %s, prevblock: %s, blockhash: %s",
+                    err, ErrorString(err), txid.ToString().c_str(), block.hashPrev.GetHex().c_str(), block.GetHash().GetHex().c_str());
+                //pTxPool->Halt();
+                //assert(1 == 2);
 #endif
                 return err;
             }
@@ -807,6 +809,7 @@ Errno CBlockChain::GetTxContxt(storage::CBlockView& view, const CTransaction& tx
         CTxOut output;
         if (!view.RetrieveUnspent(txin.prevout, output))
         {
+            StdTrace("CBlockChain", "GetTxContxt: RetrieveUnspent fail: prevout: %s [%d]", txin.prevout.hash.GetHex().c_str(), txin.prevout.n);
             return ERR_MISSING_PREV;
         }
         if (txContxt.destIn.IsNull())
@@ -815,6 +818,7 @@ Errno CBlockChain::GetTxContxt(storage::CBlockView& view, const CTransaction& tx
         }
         else if (txContxt.destIn != output.destTo)
         {
+            StdTrace("CBlockChain", "GetTxContxt: destIn error: destIn: %s, destTo: %s", txContxt.destIn.ToString().c_str(), output.destTo.ToString().c_str());
             return ERR_TRANSACTION_INVALID;
         }
         txContxt.vin.push_back(CTxInContxt(output));
