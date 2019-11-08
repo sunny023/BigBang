@@ -32,14 +32,15 @@ public:
 public:
     enum
     {
-        WTX_ISMINE = (1 << 0),
-        WTX_FROMME = (1 << 1)
+        WTX_ISMINE    = (1 << 0),
+        WTX_FROMME    = (1 << 1),
+        WTX_WATCHONLY = (1 << 2),
     };
     CWalletTx()
     {
         SetNull();
     }
-    CWalletTx(const uint256& txidIn, const CAssembledTx& tx, const uint256& hashForkIn, bool fIsMine, bool fFromMe)
+    CWalletTx(const uint256& txidIn, const CAssembledTx& tx, const uint256& hashForkIn, bool fIsMine, bool fFromMe, bool fWatchOnly)
     {
         nVersion = tx.nVersion;
         nType = tx.nType;
@@ -52,7 +53,7 @@ public:
         destIn = tx.destIn;
         nValueIn = tx.nValueIn;
         nBlockHeight = tx.nBlockHeight;
-        nFlags = (fIsMine ? WTX_ISMINE : 0) | (fFromMe ? WTX_FROMME : 0);
+        nFlags = (fIsMine ? WTX_ISMINE : 0) | (fFromMe ? WTX_FROMME : 0) | (fWatchOnly ? WTX_WATCHONLY : 0);
         txid = txidIn;
         hashFork = hashForkIn;
         nRefCount = 0;
@@ -92,6 +93,10 @@ public:
     {
         return (nFlags & WTX_FROMME);
     }
+    bool IsWatchOnly() const
+    {
+        return (nFlags & WTX_WATCHONLY);
+    }
     std::string GetTypeString() const
     {
         if (nType == CTransaction::TX_TOKEN)
@@ -110,9 +115,9 @@ public:
     {
         return (int64)nTimeStamp;
     }
-    void SetFlags(bool fIsMine, bool fFromMe)
+    void SetFlags(bool fIsMine, bool fFromMe, bool fWatchOnly)
     {
-        nFlags = (fIsMine ? WTX_ISMINE : 0) | (fFromMe ? WTX_FROMME : 0);
+        nFlags = (fIsMine ? WTX_ISMINE : 0) | (fFromMe ? WTX_FROMME : 0) | (fWatchOnly ? WTX_WATCHONLY : 0);
     }
     int64 GetChange() const
     {

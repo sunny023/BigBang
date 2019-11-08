@@ -98,6 +98,9 @@ bool CWalletAddrDB::AddressDBWalker(CBufStream& ssKey, CBufStream& ssValue, CWal
 }
 
 //////////////////////////////
+// CWatchAddrDB
+
+//////////////////////////////
 // CWalletTxDB
 
 bool CWalletTxDB::Initialize(const boost::filesystem::path& pathWallet)

@@ -270,6 +270,12 @@ bool CWallet::Have(const crypto::CPubKey& pubkey) const
     return (!!mapKeyStore.count(pubkey));
 }
 
+bool CWallet::HaveWatch(const crypto::CPubKey& pubkey) const
+{
+    boost::shared_lock<boost::shared_mutex> rlock(rwWatchKey);
+    return (!!mapWatchKey.count(pubkey));
+}
+
 bool CWallet::Export(const crypto::CPubKey& pubkey, vector<unsigned char>& vchKey) const
 {
     boost::shared_lock<boost::shared_mutex> rlock(rwKeyStore);

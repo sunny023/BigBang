@@ -183,6 +183,7 @@ public:
     virtual bool AddKey(const crypto::CKey& key) = 0;
     virtual void GetPubKeys(std::set<crypto::CPubKey>& setPubKey) const = 0;
     virtual bool Have(const crypto::CPubKey& pubkey) const = 0;
+    virtual bool HaveWatch(const crypto::CPubKey& pubkey) const = 0;
     virtual bool Export(const crypto::CPubKey& pubkey, std::vector<unsigned char>& vchKey) const = 0;
     virtual bool Import(const std::vector<unsigned char>& vchKey, crypto::CPubKey& pubkey) = 0;
     virtual bool Encrypt(const crypto::CPubKey& pubkey, const crypto::CCryptoString& strPassphrase,
@@ -273,6 +274,7 @@ public:
     virtual bool RemovePendingTx(const uint256& txid) = 0;
     /* Wallet */
     virtual bool HaveKey(const crypto::CPubKey& pubkey) = 0;
+    virtual bool HaveWatchKey(const crypto::CPubKey& pubkey) = 0;
     virtual void GetPubKeys(std::set<crypto::CPubKey>& setPubKey) = 0;
     virtual bool GetKeyStatus(const crypto::CPubKey& pubkey, int& nVersion, bool& fLocked, int64& nAutoLockTime) = 0;
     virtual bool MakeNewKey(const crypto::CCryptoString& strPassphrase, crypto::CPubKey& pubkey) = 0;

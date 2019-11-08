@@ -2026,6 +2026,11 @@ CRPCResultPtr CRPCMod::RPCImportAddress(CRPCParamPtr param)
     {
         throw CRPCException(RPC_WALLET_ERROR, "The address you give has already been in the wallet with payable role.");
     }
+    bool isWatched = pService->HaveWatchKey(pubkey);
+    if (isWatched)
+    {
+        throw CRPCException(RPC_WALLET_ERROR, "The address you give has already been monitored in wallet");
+    }
 
     string strPubkey = pubkey.GetHex();
 

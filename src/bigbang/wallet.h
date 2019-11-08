@@ -122,6 +122,7 @@ public:
     bool LoadKey(const crypto::CKey& key);
     void GetPubKeys(std::set<crypto::CPubKey>& setPubKey) const override;
     bool Have(const crypto::CPubKey& pubkey) const override;
+    bool HaveWatch(const crypto::CPubKey& pubkey) const override;
     bool Export(const crypto::CPubKey& pubkey, std::vector<unsigned char>& vchKey) const override;
     bool Import(const std::vector<unsigned char>& vchKey, crypto::CPubKey& pubkey) override;
 
@@ -191,10 +192,16 @@ protected:
     ITxPool* pTxPool;
     mutable boost::shared_mutex rwKeyStore;
     mutable boost::shared_mutex rwWalletTx;
+    mutable boost::shared_mutex rwWatchKey;
+    mutable boost::shared_mutex rwWatchTx;
     std::map<crypto::CPubKey, CWalletKeyStore> mapKeyStore;
+    std::map<crypto::CPubKey, string> mapWatchKey;      // vs. label
     std::map<CTemplateId, CTemplatePtr> mapTemplatePtr;
+    std::map<CTemplateId, string> mapWatchTemplate;     // vs. label
     std::map<uint256, std::shared_ptr<CWalletTx>> mapWalletTx;
     std::map<CDestination, CWalletUnspent> mapWalletUnspent;
+    std::map<uint256, std::shared_ptr<CWalletTx>> mapWatchTx;
+    std::map<CDestination, CWalletUnspent> mapWatchUnspent;
     std::map<uint256, CWalletFork> mapFork;
 };
 
@@ -211,6 +218,10 @@ public:
     }
     virtual void GetPubKeys(std::set<crypto::CPubKey>& setPubKey) const override {}
     virtual bool Have(const crypto::CPubKey& pubkey) const override
+    {
+        return false;
+    }
+    virtual bool HaveWatch(const crypto::CPubKey& pubkey) const override
     {
         return false;
     }

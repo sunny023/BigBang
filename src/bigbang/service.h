@@ -47,6 +47,7 @@ public:
     bool RemovePendingTx(const uint256& txid) override;
     /* Wallet */
     bool HaveKey(const crypto::CPubKey& pubkey) override;
+    bool HaveWatchKey(const crypto::CPubKey& pubkey) override;
     void GetPubKeys(std::set<crypto::CPubKey>& setPubKey) override;
     bool GetKeyStatus(const crypto::CPubKey& pubkey, int& nVersion, bool& fLocked, int64& nAutoLockTime) override;
     bool MakeNewKey(const crypto::CCryptoString& strPassphrase, crypto::CPubKey& pubkey) override;

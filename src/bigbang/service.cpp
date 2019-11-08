@@ -350,6 +350,11 @@ bool CService::HaveKey(const crypto::CPubKey& pubkey)
     return pWallet->Have(pubkey);
 }
 
+bool CService::HaveWatchKey(const crypto::CPubKey& pubkey)
+{
+    return pWallet->HaveWatch(pubkey);
+}
+
 void CService::GetPubKeys(set<crypto::CPubKey>& setPubKey)
 {
     pWallet->GetPubKeys(setPubKey);

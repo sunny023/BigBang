@@ -27,6 +27,13 @@ public:
     virtual bool WalkTemplate(const CTemplateId& tid, const std::vector<unsigned char>& vchData) = 0;
 };
 
+class CWatchDBAddrWalker
+{
+public:
+    virtual bool WalkPubkey(const crypto::CPubKey& pubkey, const string& label) = 0;
+    virtual bool WalkTemplate(const CTemplateId& tid, const string& label) = 0;
+};
+
 class CWalletDBTxWalker
 {
 public:
@@ -47,6 +54,21 @@ public:
     void Deinitialize();
     bool UpdateKey(const crypto::CPubKey& pubkey, int version, const crypto::CCryptoCipher& cipher);
     bool UpdateTemplate(const CTemplateId& tid, const std::vector<unsigned char>& vchData);
+    bool EraseAddress(const CDestination& dest);
+    bool WalkThroughAddress(CWalletDBAddrWalker& walker);
+
+protected:
+    bool AddressDBWalker(xengine::CBufStream& ssKey, xengine::CBufStream& ssValue, CWalletDBAddrWalker& walker);
+};
+
+class CWatchAddrDB : public xengine::CKVDB
+{
+public:
+    CWatchAddrDB() {}
+    bool Initialize(const boost::filesystem::path& pathWallet);
+    void Deinitialize();
+    bool UpdateKey(const crypto::CPubKey& pubkey, string label);
+    bool UpdateTemplate(const CTemplateId& tid, string label);
     bool EraseAddress(const CDestination& dest);
     bool WalkThroughAddress(CWalletDBAddrWalker& walker);
 

@@ -419,7 +419,7 @@ bool CBlockBase::AddNew(const uint256& hash, CBlockEx& block, CBlockIndex** ppIn
         CBlockIndex* pIndexNew = AddNewIndex(hash, block, nFile, nOffset, nChainTrust);
         if (pIndexNew == nullptr)
         {
-            StdTrace("[BlockBase][TRACE]", "AddNewIndex faild: %s", hash.ToString().c_str());
+            StdTrace("[BlockBase][TRACE]", "AddNewIndex failed: %s", hash.ToString().c_str());
             return false;
         }
 
@@ -435,7 +435,7 @@ bool CBlockBase::AddNew(const uint256& hash, CBlockEx& block, CBlockIndex** ppIn
         {
             if (!UpdateDelegate(hash, block, CDiskPos(nFile, nOffset)))
             {
-                StdTrace("[BlockBase][TRACE]", "UpdateDElegate failed: %s", hash.ToString().c_str());
+                StdTrace("[BlockBase][TRACE]", "Update delegate failed: %s", hash.ToString().c_str());
                 dbBlock.RemoveBlock(hash);
                 mapIndex.erase(hash);
                 delete pIndexNew;
